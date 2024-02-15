@@ -1,7 +1,7 @@
 ﻿
 public class NotificationWriteRepository : WriteRepository<Notification>, INotificationWriteRepository
 {
-    private readonly ICumulativeLeaveWriteRepository  _cumulativeWriteRepository;
+    private readonly ICumulativeLeaveWriteRepository _cumulativeWriteRepository;
 
     public NotificationWriteRepository(IzinTalepAPIContext context, ICumulativeLeaveWriteRepository cumulativeWriteRepository) : base(context)
     {
@@ -73,18 +73,18 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
 
     private async Task CreateNotificationForExcessLeave(Guid userId, LeaveType leaveType, int usedHours, int allowedHours, LeaveRequestDTO leaveRequestDto)
     {
+        _cumulativeWriteRepository.ClearContextAsync();
         // İzin süresinin aşıldığı durumda bildirim oluştur
         var notification = new Notification
         {
             UserId = userId,
-            Message = $"Yıllık izin süresi aşıldı. Kullanılan saat: {usedHours}, İzin limiti: {allowedHours}",
+            Message = NotificationMessage(leaveType, usedHours, allowedHours),
             CreateDate = DateTime.UtcNow,
-           CumulativeLeaveRequestId = leaveRequestDto.CumulativeLeaveRequestId
+            CumulativeLeaveRequestId = leaveRequestDto.CumulativeLeaveRequestId
         };
 
-        // Bildirimi kaydet
+        // Bildirimi ekle
         await AddAsync(notification);
-
         // İzin talebi Workflow bilgisi her durumda Exception olacak ve kullanıcı ile varsa Manager’a bildirim yapılacaktır.
         leaveRequestDto.WorkflowStatus = Workflow.Exception;
 
@@ -94,29 +94,62 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
             var managerNotification = new Notification
             {
                 UserId = leaveRequestDto.AssignedUserId.Value,
-                Message = $"Çalışanınızın izin talebi bir istisna durumu oluşturdu. Detaylar için kontrol ediniz.",
+                Message = NotificationMessage(leaveType, usedHours, allowedHours),
                 CreateDate = DateTime.UtcNow,
-           CumulativeLeaveRequestId = leaveRequestDto.CumulativeLeaveRequestId
+                CumulativeLeaveRequestId = leaveRequestDto.CumulativeLeaveRequestId
             };
 
             // Manager bildirimini kaydet
             await AddAsync(managerNotification);
         }
+        // Bildirimi kaydet
+        await SaveAsync();
     }
 
 
     private async Task CreateNotificationForUsedHours(Guid userId, LeaveType leaveType, int usedHours, int allowedHours, Guid? cumulativeRequestId)
     {
         // Kullanıcıya kullanılan izin süresinin %80'i aşıldığında bildirim oluştur
+
+        string message = NotificationMessage(leaveType, usedHours, allowedHours);
+
         var notification = new Notification
         {
             UserId = userId,
-            Message = $"Kullanılan izin süresi, izin limitinin %80'ini aştı. Kullanılan saat: {usedHours}, İzin limiti: {allowedHours}",
+            Message = message,
             CreateDate = DateTime.UtcNow,
-           CumulativeLeaveRequestId = cumulativeRequestId
+            CumulativeLeaveRequestId = cumulativeRequestId
         };
 
         // Bildirimi kaydet
         await AddAsync(notification);
+        await SaveAsync();
+    }
+
+    private string NotificationMessage(LeaveType leaveType, int usedHours, int allowedHours)
+    {
+        // Calculate remaining and exceeded hours
+        int remainingHours = allowedHours - usedHours;
+        int exceededHours = usedHours - allowedHours;
+
+        // Determine the notification message based on the situation
+        string message = "";
+        if (remainingHours <= 0)
+        {
+            // Exceeded hours case
+            message = $"Aşılan {leaveType} {exceededHours} saat";
+        }
+        else if (exceededHours > 0)
+        {
+            // Both remaining and exceeded hours case
+            message = $"Kalan {leaveType} {remainingHours} saat, Aşılan {leaveType} {exceededHours} saat";
+        }
+        else
+        {
+            // Remaining hours case
+            message = $"Kalan {leaveType} {remainingHours} saat";
+        }
+
+        return message;
     }
 }

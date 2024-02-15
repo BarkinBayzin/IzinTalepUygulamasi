@@ -57,7 +57,7 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
                 break;
         }
 
-        // Talebi veritabanına kaydet
+        // Talebi contexte ekle
         bool resultLeaveRequest = await _leaveRequestWriteRepository.AddAsync(_mapper.Map<LeaveRequest>(leaveRequestDto));
         if (resultLeaveRequest)
         {
@@ -67,15 +67,20 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
             CumulativeLeaveRequestDTO cumulativeDto = _mapper.Map<CumulativeLeaveRequestDTO>(cumulative);
             if (cumulativeDto == null)
             {
-                cumulativeDto = new CumulativeLeaveRequestDTO { UserId=request.LeaveRequestDTO.CreatedById, LeaveType=leaveRequestDto.LeaveType, Id = Guid.NewGuid() };
-                leaveRequestDto.CumulativeLeaveRequestId = cumulativeDto.Id;
+                cumulativeDto = new() 
+                { 
+                    UserId=request.LeaveRequestDTO.CreatedById, 
+                    LeaveType=leaveRequestDto.LeaveType           
+                };
+                
             }
+            cumulativeDto.TotalHours = (short)CalculateWorkingHours(leaveRequestDto.StartDate, leaveRequestDto.EndDate);
             bool resultCumulativeLeaveRequest = await _cumulativeLeaveWriteRepository.UpdateCumulativeLeaveRequestAsync(cumulativeDto);
-
+            leaveRequestDto.CumulativeLeaveRequestId = cumulativeDto.Id;
             if (resultCumulativeLeaveRequest)
             {
-                leaveRequestDto.CumulativeLeaveRequestId = cumulativeDto.Id;
                 await _notificationWriteRepository.CheckAndCreateNotificationsAsync(leaveRequestDto);
+                await _notificationWriteRepository.SaveAsync();
                 return new BaseResponse
                 {
                     Success = resultCumulativeLeaveRequest,
@@ -84,12 +89,14 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
                 };
             }
             else
+            {
                 return new BaseResponse
                 {
                     Success = resultCumulativeLeaveRequest,
                     Id = resultCumulativeLeaveRequest ? cumulativeDto.Id.ToString() : default,
                     Message = resultCumulativeLeaveRequest ? "Leave Request Added" : "Leave Request Added But Cumulative Leave Request Can Not Created!"
                 };
+            }
         }
         return new BaseResponse
         {
@@ -102,6 +109,43 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
     {
         ADUserDTO dto = _mapper.Map<ADUserDTO>(await _userReadRepository.GetByIdAsync(userId.ToString()));
         return dto.ManagerId;
+    }
+
+    private double CalculateWorkingHours(DateTime startDate, DateTime endDate)
+    {
+        double totalWorkingHours = 0;
+
+        // Calculate working hours for the same day
+        if (startDate.Date == endDate.Date)
+        {
+            double hoursOnSameDay = (endDate - startDate).TotalHours;
+
+            // Check if the current day is not Sunday
+            if (startDate.DayOfWeek != DayOfWeek.Sunday)
+            {
+                // Assuming a standard workday is 8 hours
+                totalWorkingHours += Math.Min(hoursOnSameDay, 8);
+            }
+        }
+        else
+        {
+            DateTime currentDate = startDate;
+
+            while (currentDate <= endDate)
+            {
+                // Check if the current day is not Sunday
+                if (currentDate.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    // Assuming a standard workday is 8 hours
+                    totalWorkingHours += 8;
+                }
+
+                // Move to the next day
+                currentDate = currentDate.AddDays(1);
+            }
+        }
+
+        return totalWorkingHours;
     }
 
 }

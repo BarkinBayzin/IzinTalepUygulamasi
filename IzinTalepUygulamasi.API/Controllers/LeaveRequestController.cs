@@ -29,13 +29,13 @@ namespace IzinTalepUygulamasi.API.Controllers
             }
         }
 
-        // GET: api/<LeaveRequestController>
+        // GET: api/<LeaveRequestController>/{pageNumber}
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] int pageNumber = 1)
         {
             try
             {
-                return Ok(await _mediator.Send(new GetLeaveRequestListRequest()));
+                return Ok(await _mediator.Send(new GetLeaveRequestListRequest { PageNumber = pageNumber }));
             }
             catch (Exception ex)
             {

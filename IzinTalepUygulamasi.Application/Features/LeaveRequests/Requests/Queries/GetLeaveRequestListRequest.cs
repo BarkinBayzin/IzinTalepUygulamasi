@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-public class GetLeaveRequestListRequest : IRequest<BasePaginationResponse<List<GetLeaveRequestListRequest>>>
+public class GetLeaveRequestListRequest : IRequest<BasePaginationResponse<List<LeaveRequestResponseModel>>>
 {
     [Display(Name = "ReqFormNumber")]
     public string? RequestNumber { get; set; }
@@ -17,11 +17,15 @@ public class GetLeaveRequestListRequest : IRequest<BasePaginationResponse<List<G
         TimeSpan duration = EndDate - StartDate;
         return (short)duration.TotalHours;
     }
+    
     public Workflow WorkflowStatus { get; set; }
     public string FullName { get; set; }
     [JsonIgnore]
     public Guid CreatedById { get; set; }
+    [JsonIgnore]
 
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
+    public int PageNumber { get; set; }
+    [JsonIgnore]
+
+    public int PageSize { get; set; } = 3;
 }

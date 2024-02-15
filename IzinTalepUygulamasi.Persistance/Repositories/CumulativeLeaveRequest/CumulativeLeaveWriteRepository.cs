@@ -1,7 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-
-public class CumulativeLeaveWriteRepository : WriteRepository<CumulativeLeaveRequest>, ICumulativeLeaveWriteRepository 
+﻿public class CumulativeLeaveWriteRepository : WriteRepository<CumulativeLeaveRequest>, ICumulativeLeaveWriteRepository 
 {
     private readonly ICumulativeLeaveReadRepository _cumulativeLeaveReadRepository;
     public CumulativeLeaveWriteRepository(IzinTalepAPIContext context, ICumulativeLeaveReadRepository cumulativeLeaveReadRepository) : base(context)
@@ -22,7 +19,7 @@ public class CumulativeLeaveWriteRepository : WriteRepository<CumulativeLeaveReq
             {
                 UserId = dto.UserId,
                 LeaveType = dto.LeaveType,
-                TotalHours = (short)CalculateLeaveHours(dto.LeaveType),
+                TotalHours = dto.TotalHours,
                 Year = (short)DateTime.UtcNow.Year
             };
 
@@ -31,7 +28,7 @@ public class CumulativeLeaveWriteRepository : WriteRepository<CumulativeLeaveReq
         else
         {
             // Kümülatif izin verisi bulunduysa, mevcut izinlere eklenen saat kadar güncellenir
-            cumulativeLeaveRequest.TotalHours += (short)CalculateLeaveHours(dto.LeaveType);
+            cumulativeLeaveRequest.TotalHours += dto.TotalHours;
 
            return await UpdateAsync(cumulativeLeaveRequest);
         }

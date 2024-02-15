@@ -9,12 +9,12 @@ public class WriteRepository<T> : IWriteRepository<T> where T : BaseEntity
     public async Task<bool> AddAsync(T entity)
     {
         EntityEntry<T> entityEntry = await Table.AddAsync(entity);
-        return await SaveAsync();
+        return entityEntry.State == EntityState.Added;
     }
     public async Task<bool> UpdateAsync(T entity)
     {
         EntityEntry<T> entityEntry = Table.Update(entity);
-        return await SaveAsync();
+        return entityEntry.State == EntityState.Modified;
     }
     public bool Destroy(T entity)
     {
@@ -28,4 +28,6 @@ public class WriteRepository<T> : IWriteRepository<T> where T : BaseEntity
             return false;
         else return true;
     }
+
+    public void ClearContextAsync() => _context.ChangeTracker.Clear();
 }
