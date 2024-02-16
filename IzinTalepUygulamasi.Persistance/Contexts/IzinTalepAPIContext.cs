@@ -10,8 +10,6 @@ public class IzinTalepAPIContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Seed data konfigürasyonları...
-        modelBuilder.Entity<ADUser>().Seed();
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
@@ -25,9 +23,9 @@ public class IzinTalepAPIContext : DbContext
         {
             _ = data.State switch
             {
-                EntityState.Added => data.Entity.CreatedAt = DateTime.UtcNow,
-                EntityState.Modified => data.Entity.LastModifiedAt = DateTime.UtcNow,
-                _ => DateTime.UtcNow
+                EntityState.Added => data.Entity.CreatedAt = DateTime.Now,
+                EntityState.Modified => data.Entity.LastModifiedAt = DateTime.Now,
+                _ => DateTime.Now
             };
         }
 

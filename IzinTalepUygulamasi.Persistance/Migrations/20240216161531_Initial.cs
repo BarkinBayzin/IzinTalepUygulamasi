@@ -41,7 +41,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LeaveType = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TotalHours = table.Column<short>(type: "smallint", nullable: false),
+                    TotalHour = table.Column<short>(type: "smallint", nullable: false),
                     Year = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
@@ -71,7 +71,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                     AssignedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LastModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -103,7 +103,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CumulativeLeaveRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CumulativeLeaveRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -128,8 +128,8 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                 values: new object[,]
                 {
                     { new Guid("e21cd525-031c-4364-b173-4150a4e18c37"), "munir.ozkul@negzel.net", "Münir", "Özkul", null, 30 },
-                    { new Guid("59fb152a-2d59-435d-8fc1-cbc35c0f1d82"), "sener.sen@negzel.net", "Şener", "Şen", new Guid("e21cd525-031c-4364-b173-4150a4e18c37"), 10 },
-                    { new Guid("23591451-1cf1-46a5-907a-ee3e52abe394"), "kemal.sunal@negzel.net", "Kemal", "Sunal", new Guid("59fb152a-2d59-435d-8fc1-cbc35c0f1d82"), 20 }
+                    { new Guid("23591451-1cf1-46a5-907a-ee3e52abe394"), "kemal.sunal@negzel.net", "Kemal", "Sunal", new Guid("e21cd525-031c-4364-b173-4150a4e18c37"), 20 },
+                    { new Guid("59fb152a-2d59-435d-8fc1-cbc35c0f1d82"), "sener.sen@negzel.net", "Şener", "Şen", new Guid("e21cd525-031c-4364-b173-4150a4e18c37"), 10 }
                 });
 
             migrationBuilder.CreateIndex(

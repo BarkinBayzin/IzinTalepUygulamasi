@@ -17,8 +17,6 @@ public class ValidationFilter : IAsyncActionFilter //Action'a gelen isteklerde �
         }
 
         await next(); //Sonraki delege geçişi için next ile tamamlıyoruz.
-
-        //Şimdi servisimi container'a ekliyoruz.
     }
 }
 

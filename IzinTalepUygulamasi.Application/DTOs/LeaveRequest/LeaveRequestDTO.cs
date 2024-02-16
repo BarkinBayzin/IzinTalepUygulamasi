@@ -1,12 +1,5 @@
 ﻿public class LeaveRequestDTO
 {
-    public LeaveRequestDTO()
-    {
-
-        CreatedAt = DateTime.UtcNow;
-        Id = Guid.NewGuid();
-        LastModifiedAt = CreatedAt;
-    }
     public Guid Id { get; set; }
     public LeaveType LeaveType { get; set; }
     public string Reason { get; set; }

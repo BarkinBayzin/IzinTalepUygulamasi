@@ -11,13 +11,15 @@ public class GetLeaveRequestListRequest : IRequest<BasePaginationResponse<List<L
     public DateTime CreatedAt { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public short TotalHour => CalculateTotalHour();
-    private short CalculateTotalHour()
-    {
-        TimeSpan duration = EndDate - StartDate;
-        return (short)duration.TotalHours;
-    }
-    
+    public short TotalHour { get; set; }
+
+    //=> CalculateTotalHour();
+    //private short CalculateTotalHour()
+    //{
+    //    TimeSpan duration = EndDate - StartDate;
+    //    return (short)duration.TotalHours;
+    //}
+
     public Workflow WorkflowStatus { get; set; }
     public string FullName { get; set; }
     [JsonIgnore]

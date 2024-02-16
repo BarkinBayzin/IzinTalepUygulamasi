@@ -29,7 +29,7 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
         if (leaveRequestDto.WorkflowStatus != Workflow.Exception && leaveRequestDto.WorkflowStatus != Workflow.None)
         {
             var allowedHours = _cumulativeWriteRepository.CalculateLeaveHours(leaveRequestDto.LeaveType);
-            var usedHours = await _cumulativeWriteRepository.GetUsedLeaveHoursAsync(leaveRequestDto.CreatedById, leaveRequestDto.LeaveType, DateTime.UtcNow.Year);
+            var usedHours = await _cumulativeWriteRepository.GetUsedLeaveHoursAsync(leaveRequestDto.CreatedById, leaveRequestDto.LeaveType, DateTime.Now.Year);
 
             if (usedHours >= allowedHours * 0.8)
             {
@@ -42,7 +42,7 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
     {
         // AnnualLeave için özel kontrol ve bildirim işlemleri burada yapılır
         var allowedHours = _cumulativeWriteRepository.CalculateLeaveHours(LeaveType.AnnualLeave);
-        var usedHours = await _cumulativeWriteRepository.GetUsedLeaveHoursAsync(leaveRequestDto.CreatedById, LeaveType.AnnualLeave, DateTime.UtcNow.Year);
+        var usedHours = await _cumulativeWriteRepository.GetUsedLeaveHoursAsync(leaveRequestDto.CreatedById, LeaveType.AnnualLeave, DateTime.Now.Year);
 
         if (usedHours > allowedHours)
         {
@@ -58,7 +58,7 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
     {
         // ExcusedAbsence için özel kontrol ve bildirim işlemleri burada yapılır
         var allowedHours = _cumulativeWriteRepository.CalculateLeaveHours(LeaveType.ExcusedAbsence);
-        var usedHours = await _cumulativeWriteRepository.GetUsedLeaveHoursAsync(leaveRequestDto.CreatedById, LeaveType.ExcusedAbsence, DateTime.UtcNow.Year);
+        var usedHours = await _cumulativeWriteRepository.GetUsedLeaveHoursAsync(leaveRequestDto.CreatedById, LeaveType.ExcusedAbsence, DateTime.Now.Year);
 
         if (usedHours > allowedHours)
         {
@@ -75,13 +75,7 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
     {
         _cumulativeWriteRepository.ClearContextAsync();
         // İzin süresinin aşıldığı durumda bildirim oluştur
-        var notification = new Notification
-        {
-            UserId = userId,
-            Message = NotificationMessage(leaveType, usedHours, allowedHours),
-            CreateDate = DateTime.UtcNow,
-            CumulativeLeaveRequestId = leaveRequestDto.CumulativeLeaveRequestId
-        };
+        Notification notification = new Notification(userId, NotificationMessage(leaveType, usedHours, allowedHours), DateTime.Now, leaveRequestDto.CumulativeLeaveRequestId);
 
         // Bildirimi ekle
         await AddAsync(notification);
@@ -91,40 +85,19 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
         if (leaveRequestDto.AssignedUserId.HasValue)
         {
             // Manager'a bildirim yap
-            var managerNotification = new Notification
-            {
-                UserId = leaveRequestDto.AssignedUserId.Value,
-                Message = NotificationMessage(leaveType, usedHours, allowedHours),
-                CreateDate = DateTime.UtcNow,
-                CumulativeLeaveRequestId = leaveRequestDto.CumulativeLeaveRequestId
-            };
-
+            Notification managerNotification = new Notification(leaveRequestDto.AssignedUserId.Value, NotificationMessage(leaveType, usedHours, allowedHours), DateTime.Now, leaveRequestDto.CumulativeLeaveRequestId);
             // Manager bildirimini kaydet
             await AddAsync(managerNotification);
         }
         // Bildirimi kaydet
         await SaveAsync();
+        throw new Exception("İzin ve Kümülatif izin oluşturulamadı fakat durum ile ilgili Kullanıcı ve varsa Yöneticine bildirim oluşturuldu, çünkü istenilen izin süresi, kullanılabilecek sürenin üzerinde!! Bildirimlerinizi kontrol edin");
     }
 
 
     private async Task CreateNotificationForUsedHours(Guid userId, LeaveType leaveType, int usedHours, int allowedHours, Guid? cumulativeRequestId)
-    {
-        // Kullanıcıya kullanılan izin süresinin %80'i aşıldığında bildirim oluştur
-
-        string message = NotificationMessage(leaveType, usedHours, allowedHours);
-
-        var notification = new Notification
-        {
-            UserId = userId,
-            Message = message,
-            CreateDate = DateTime.UtcNow,
-            CumulativeLeaveRequestId = cumulativeRequestId
-        };
-
-        // Bildirimi kaydet
-        await AddAsync(notification);
-        await SaveAsync();
-    }
+     =>   // Kullanıcıya kullanılan izin süresinin %80'i aşıldığında bildirim oluştur
+        await AddAsync(new Notification(userId, NotificationMessage(leaveType, usedHours, allowedHours), DateTime.Now, cumulativeRequestId));
 
     private string NotificationMessage(LeaveType leaveType, int usedHours, int allowedHours)
     {
@@ -134,6 +107,7 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
 
         // Determine the notification message based on the situation
         string message = "";
+
         if (remainingHours <= 0)
         {
             // Exceeded hours case
@@ -148,6 +122,12 @@ public class NotificationWriteRepository : WriteRepository<Notification>, INotif
         {
             // Remaining hours case
             message = $"Kalan {leaveType} {remainingHours} saat";
+        }
+
+        if (exceededHours > 15 || remainingHours > 15)
+        {
+            message = message.Replace("saat", "gün");
+            message = message.Replace(exceededHours.ToString(), $"{exceededHours / 8}");
         }
 
         return message;

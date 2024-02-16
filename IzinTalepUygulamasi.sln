@@ -5,21 +5,15 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F5376094-8FC5-4E05-8BB3-8478F0748D02}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{5A24BA68-1D20-4302-8189-CD0E6B75CBA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IzinTalepUygulamasi.Application", "IzinTalepUygulamasi.Application\IzinTalepUygulamasi.Application.csproj", "{925BF4A0-EB07-4786-91FC-143BA50E11CE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{420C4C8D-AA1D-42FC-8FFA-6A0B453A906E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IzinTalepUygulamasi.Domain", "IzinTalepUygulamasi.Domain\IzinTalepUygulamasi.Domain.csproj", "{EED4AC72-5B2D-40E7-A016-C4300F77A506}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{1923488C-C6F8-43E1-834A-F39BD81A5607}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IzinTalepUygulamasi.Infrastructure", "IzinTalepUygulamasi.Infrastructure\IzinTalepUygulamasi.Infrastructure.csproj", "{B9C0FAF7-B876-408F-BBFD-A875C0C5919E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IzinTalepUygulamasi.Application", "IzinTalepUygulamasi.Application\IzinTalepUygulamasi.Application.csproj", "{925BF4A0-EB07-4786-91FC-143BA50E11CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IzinTalepUygulamasi.Persistance", "IzinTalepUygulamasi.Persistance\IzinTalepUygulamasi.Persistance.csproj", "{427F31C8-C18D-42D7-83ED-55D630165C54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IzinTalepUygulamasi.Domain", "IzinTalepUygulamasi.Domain\IzinTalepUygulamasi.Domain.csproj", "{EED4AC72-5B2D-40E7-A016-C4300F77A506}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IzinTalepUygulamasi.Infrastructure", "IzinTalepUygulamasi.Infrastructure\IzinTalepUygulamasi.Infrastructure.csproj", "{B9C0FAF7-B876-408F-BBFD-A875C0C5919E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IzinTalepUygulamasi.Persistance", "IzinTalepUygulamasi.Persistance\IzinTalepUygulamasi.Persistance.csproj", "{427F31C8-C18D-42D7-83ED-55D630165C54}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IzinTalepUygulamasi.API", "IzinTalepUygulamasi.API\IzinTalepUygulamasi.API.csproj", "{FBA27CDC-C94B-43ED-93AE-FBD00A53BB4B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IzinTalepUygulamasi.API", "IzinTalepUygulamasi.API\IzinTalepUygulamasi.API.csproj", "{FBA27CDC-C94B-43ED-93AE-FBD00A53BB4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,14 +46,11 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{5A24BA68-1D20-4302-8189-CD0E6B75CBA3} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
-		{420C4C8D-AA1D-42FC-8FFA-6A0B453A906E} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
-		{1923488C-C6F8-43E1-834A-F39BD81A5607} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
-		{925BF4A0-EB07-4786-91FC-143BA50E11CE} = {5A24BA68-1D20-4302-8189-CD0E6B75CBA3}
-		{EED4AC72-5B2D-40E7-A016-C4300F77A506} = {5A24BA68-1D20-4302-8189-CD0E6B75CBA3}
-		{B9C0FAF7-B876-408F-BBFD-A875C0C5919E} = {420C4C8D-AA1D-42FC-8FFA-6A0B453A906E}
-		{427F31C8-C18D-42D7-83ED-55D630165C54} = {420C4C8D-AA1D-42FC-8FFA-6A0B453A906E}
-		{FBA27CDC-C94B-43ED-93AE-FBD00A53BB4B} = {1923488C-C6F8-43E1-834A-F39BD81A5607}
+		{925BF4A0-EB07-4786-91FC-143BA50E11CE} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
+		{EED4AC72-5B2D-40E7-A016-C4300F77A506} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
+		{B9C0FAF7-B876-408F-BBFD-A875C0C5919E} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
+		{427F31C8-C18D-42D7-83ED-55D630165C54} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
+		{FBA27CDC-C94B-43ED-93AE-FBD00A53BB4B} = {F5376094-8FC5-4E05-8BB3-8478F0748D02}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4A21D27-A84F-4D6D-B778-BC628BA563AC}

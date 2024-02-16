@@ -75,7 +75,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                             Email = "kemal.sunal@negzel.net",
                             FirstName = "Kemal",
                             LastName = "Sunal",
-                            ManagerId = new Guid("59fb152a-2d59-435d-8fc1-cbc35c0f1d82"),
+                            ManagerId = new Guid("e21cd525-031c-4364-b173-4150a4e18c37"),
                             UserType = 20
                         });
                 });
@@ -89,7 +89,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                     b.Property<int>("LeaveType")
                         .HasColumnType("int");
 
-                    b.Property<short>("TotalHours")
+                    b.Property<short>("TotalHour")
                         .HasColumnType("smallint");
 
                     b.Property<Guid>("UserId")
@@ -129,7 +129,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FormNumber"));
 
-                    b.Property<DateTime?>("LastModifiedAt")
+                    b.Property<DateTime>("LastModifiedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("LastModifiedById")
@@ -174,7 +174,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CumulativeLeaveRequestId")
+                    b.Property<Guid?>("CumulativeLeaveRequestId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Message")
@@ -241,8 +241,7 @@ namespace IzinTalepUygulamasi.Persistance.Migrations
                     b.HasOne("CumulativeLeaveRequest", "CumulativeLeaveRequest")
                         .WithMany("Notifications")
                         .HasForeignKey("CumulativeLeaveRequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ADUser", "User")
                         .WithMany("Notifications")

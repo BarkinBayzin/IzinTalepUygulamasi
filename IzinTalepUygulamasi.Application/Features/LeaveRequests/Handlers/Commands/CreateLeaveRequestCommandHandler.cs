@@ -62,42 +62,56 @@ public class CreateLeaveRequestCommandHandler : IRequestHandler<CreateLeaveReque
         if (resultLeaveRequest)
         {
             // Kümülatif verileri güncelle
-            var cumulative = await _cumulativeLeaveReadRepository.GetCumulativeLeaveRequestAsync(user.Id, leaveRequestDto.LeaveType, DateTime.UtcNow.Year);
+            var cumulative = await _cumulativeLeaveReadRepository.GetCumulativeLeaveRequestAsync(user.Id, leaveRequestDto.LeaveType, DateTime.Now.Year);
 
             CumulativeLeaveRequestDTO cumulativeDto = _mapper.Map<CumulativeLeaveRequestDTO>(cumulative);
             if (cumulativeDto == null)
             {
-                cumulativeDto = new() 
-                { 
-                    UserId=request.LeaveRequestDTO.CreatedById, 
-                    LeaveType=leaveRequestDto.LeaveType           
+                cumulativeDto = new()
+                {
+                    UserId = request.LeaveRequestDTO.CreatedById,
+                    LeaveType = leaveRequestDto.LeaveType
                 };
-                
+
             }
-            cumulativeDto.TotalHours = (short)CalculateWorkingHours(leaveRequestDto.StartDate, leaveRequestDto.EndDate);
+            cumulativeDto.TotalHour = (short)CalculateWorkingHours(leaveRequestDto.StartDate, leaveRequestDto.EndDate);
             bool resultCumulativeLeaveRequest = await _cumulativeLeaveWriteRepository.UpdateCumulativeLeaveRequestAsync(cumulativeDto);
             leaveRequestDto.CumulativeLeaveRequestId = cumulativeDto.Id;
             if (resultCumulativeLeaveRequest)
             {
-                await _notificationWriteRepository.CheckAndCreateNotificationsAsync(leaveRequestDto);
-                await _notificationWriteRepository.SaveAsync();
-                return new BaseResponse
+                try
                 {
-                    Success = resultCumulativeLeaveRequest,
-                    Id = resultCumulativeLeaveRequest ? cumulativeDto.Id.ToString() : default,
-                    Message = resultCumulativeLeaveRequest ? "Leave Request, Cumulative Leave Request and Notifications are created!" : "Leave Request, Cumulative Leave Request added but Notification can not created!"
-                };
+                    await _notificationWriteRepository.CheckAndCreateNotificationsAsync(leaveRequestDto);
+                    await _notificationWriteRepository.SaveAsync();
+                    leaveRequestDto.Id = leaveRequestDto.Id;
+                    leaveRequestDto.CreatedAt = DateTime.Now;
+                    return new BaseResponse
+                    {
+                        Success = resultCumulativeLeaveRequest,
+                        Id = resultCumulativeLeaveRequest ? cumulativeDto.Id.ToString() : default,
+                        Message = resultCumulativeLeaveRequest ? "Leave Requests and Notifications are created!" : "Something went wrong Notifications can not created!"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new BaseResponse
+                    {
+                        Success = resultCumulativeLeaveRequest,
+                        Id = resultCumulativeLeaveRequest ? cumulativeDto.Id.ToString() : default,
+                        Message = ex.Message != null ? ex.Message : "Something went wrong Notifications can not created!"
+                    };
+                }
+                
             }
-            else
+            _leaveRequestWriteRepository.ClearContextAsync();
+            return new BaseResponse
             {
-                return new BaseResponse
-                {
-                    Success = resultCumulativeLeaveRequest,
-                    Id = resultCumulativeLeaveRequest ? cumulativeDto.Id.ToString() : default,
-                    Message = resultCumulativeLeaveRequest ? "Leave Request Added" : "Leave Request Added But Cumulative Leave Request Can Not Created!"
-                };
-            }
+                Success = resultCumulativeLeaveRequest,
+                Id = resultCumulativeLeaveRequest ? cumulativeDto.Id.ToString() : default,
+                Message = resultCumulativeLeaveRequest ? "Cumulative Leave Request Added" : "Something went wrong Notifications can not created!"
+            };
         }
+        _leaveRequestWriteRepository.ClearContextAsync();
         return new BaseResponse
         {
             Success = resultLeaveRequest,

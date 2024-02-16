@@ -10,32 +10,24 @@
     {
         // Kümülatif izin verilerini güncelleme işlemleri burada yapılır
         // LeaveType ve UserId'ye göre güncelleme
-        var cumulativeLeaveRequest = await _cumulativeLeaveReadRepository.GetCumulativeLeaveRequestAsync(dto.UserId, dto.LeaveType, DateTime.UtcNow.Year);
+        var cumulativeLeaveRequest = await _cumulativeLeaveReadRepository.GetCumulativeLeaveRequestAsync(dto.UserId, dto.LeaveType, DateTime.Now.Year);
 
-        if (cumulativeLeaveRequest == null)
-        {
-            // Kümülatif izin verisi bulunamadıysa, yeni bir kayıt oluşturulur
-            cumulativeLeaveRequest = new CumulativeLeaveRequest
-            {
-                UserId = dto.UserId,
-                LeaveType = dto.LeaveType,
-                TotalHours = dto.TotalHours,
-                Year = (short)DateTime.UtcNow.Year
-            };
-
-            return await AddAsync(cumulativeLeaveRequest);
-        }
+        if (cumulativeLeaveRequest == null) // Kümülatif izin verisi bulunamadıysa, yeni bir kayıt oluşturulur
+            return await AddAsync(new CumulativeLeaveRequest(dto.LeaveType, dto.UserId, dto.TotalHour, (short)DateTime.Now.Year));
         else
         {
             // Kümülatif izin verisi bulunduysa, mevcut izinlere eklenen saat kadar güncellenir
-            cumulativeLeaveRequest.TotalHours += dto.TotalHours;
-
-           return await UpdateAsync(cumulativeLeaveRequest);
+            cumulativeLeaveRequest.TotalHoursUpdater(dto.TotalHour);
+           return Update(cumulativeLeaveRequest);
         }
     }
+    /// <summary>
+    /// İzin tipine göre, toplam izin verilen saat bilgisini hesaplanır.
+    /// </summary>
+    /// <param name="leaveType">İzin tipi</param>
+    /// <returns>Yıllık toplam izin verilen süre</returns>
     public int CalculateLeaveHours(LeaveType leaveType)
     {
-        // İzin tipine göre toplam izin süresini hesapla
         switch (leaveType)
         {
             case LeaveType.AnnualLeave:
@@ -50,6 +42,6 @@
     public async Task<int> GetUsedLeaveHoursAsync(Guid userId, LeaveType leaveType, int year)
     {
         var cumulativeLeaveRequest = await _cumulativeLeaveReadRepository.GetCumulativeLeaveRequestAsync(userId, leaveType, year);
-        return cumulativeLeaveRequest?.TotalHours ?? 0;
+        return cumulativeLeaveRequest?.TotalHour ?? 0;
     }
 }

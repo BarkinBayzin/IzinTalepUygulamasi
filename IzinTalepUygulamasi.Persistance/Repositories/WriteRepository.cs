@@ -11,7 +11,7 @@ public class WriteRepository<T> : IWriteRepository<T> where T : BaseEntity
         EntityEntry<T> entityEntry = await Table.AddAsync(entity);
         return entityEntry.State == EntityState.Added;
     }
-    public async Task<bool> UpdateAsync(T entity)
+    public bool Update(T entity)
     {
         EntityEntry<T> entityEntry = Table.Update(entity);
         return entityEntry.State == EntityState.Modified;
